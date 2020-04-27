@@ -1,0 +1,27 @@
+form {
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+        ". . . "
+        "previous question next"
+        ". . .";
+}
+
+#prev_button {
+    grid-area: previous;
+}
+#next_button {
+    grid-area: next;
+}
+
+#card_content {
+    grid-area: question;
+    justify-self: stretch;
+    word-break: break-all;
+}
+
+#players_anwser {
+    background-color: white;
+}
