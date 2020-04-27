@@ -18,10 +18,16 @@ form {
 
 #card_content {
     grid-area: question;
-    justify-self: stretch;
-    word-break: break-all;
 }
 
 #players_anwser {
     background-color: white;
+}
+
+#yours_anwser_label, #players_question {
+    display: inline;
+}
+
+#your_anwser_label, #players_anwser {
+    visibility: hidden;
 }
