@@ -1,57 +1,114 @@
-;
-;
-var jsonQuiz_1 = "{\n    \"introduction\": \"Welcome to my quiz\",\n    \"questions\":{\n        \"1\": [\"10+2\", \"12\", 4],\n        \"2\": [\"2-(-24:4)\", \"8\", 10],\n        \"3\": [\"2*5\", \"10\", 10],\n        \"4\": [\"3:1\", \"3\", 10]\n    },\n    \"size\": \"4\"\n}";
-var curr_quiz = JSON.parse(jsonQuiz_1);
-var introduction_el = document.getElementById("introduction");
-var your_anwser_label = document.getElementById("your_anwser_label");
-var question_el = document.getElementById("question");
-introduction_el.innerHTML = "Introduction: " + "<br>" + curr_quiz.introduction;
-var card_number = 0;
-var players_anwser_el = document.getElementById("players_anwser");
-players_anwser_el.addEventListener('input', function (ev) {
-    if (players_anwser_el.value === curr_quiz.questions[card_number][1]) {
-        players_anwser_el.style.backgroundColor = "rgb(55, 196, 55)";
+var jsonQuiz1 = "{\n    \"introduction\": \"Welcome to my quiz\",\n    \"questions\":{\n        \"1\": [\"10+2\", \"12\", 4],\n        \"2\": [\"2-(-24:4)\", \"8\", 10],\n        \"3\": [\"2*5\", \"10\", 10],\n        \"4\": [\"3:1\", \"3\", 10]\n    },\n    \"size\": \"4\"\n}";
+var introductionEl = document.getElementById("introduction");
+var questionEl = document.getElementById("question");
+var timerEl = document.getElementById("timer");
+var numberEl = document.getElementById("number");
+var submitAnswerEl = document.getElementById("submitAnswerButton");
+var submitQuizButtonEl = document.getElementById("submitQuizButton");
+var prevButtonEl = document.getElementById("prevButton");
+var nextButtonEl = document.getElementById("nextButton");
+var inputEl = document.getElementById("playersAnswer");
+// INIT
+var currQuiz = JSON.parse(jsonQuiz1);
+var cardNumber = 0;
+introductionEl.innerHTML = currQuiz.introduction;
+var userAnswers = {};
+// TIMER
+var nIntervId;
+var timeSpent = 0;
+function startTimer() {
+    nIntervId = setInterval(function () {
+        timeSpent++;
+        timerEl.innerHTML = timeSpent + "s";
+    }, 1000);
+}
+function stopTimer() {
+    clearInterval(nIntervId);
+}
+// BUTTON NEXT
+nextButtonEl.addEventListener('click', function (ev) {
+    ev.preventDefault();
+    if (cardNumber < currQuiz.size) {
+        cardNumber++;
+    }
+    if (cardNumber === 1) { // first question card
+        // hide introduction and display gameplay elements
+        introductionEl.style.opacity = "0.1";
+        timerEl.style.visibility = "visible";
+        setQuizCardVisibility("visible");
+        startTimer();
+    }
+    // display current question
+    questionEl.innerHTML = currQuiz.questions[cardNumber][0] + " = ";
+    resetInput();
+    // update question number
+    setQuestionNumber();
+});
+// PREV BUTTON
+prevButtonEl.addEventListener('click', function (ev) {
+    ev.preventDefault();
+    if (cardNumber > 0) {
+        cardNumber--;
+    }
+    if (cardNumber === 0) {
+        stopTimer();
+        // show introduction and hide gameplay elements
+        introductionEl.style.opacity = "1.0";
+        setQuizCardVisibility("hidden");
     }
     else {
-        players_anwser_el.style.backgroundColor = "red";
+        // display current question
+        questionEl.innerHTML = currQuiz.questions[cardNumber][0] + " = ";
+        resetInput();
+    }
+    setQuestionNumber();
+});
+// INPUT
+submitAnswerEl.addEventListener('click', function (ev) {
+    console.log("jestem w listenerze submit answer");
+    if (inputEl.value !== "") {
+        userAnswers[cardNumber] = inputEl.value;
+        console.log("input niepusty");
+    }
+    if (allAnswersSubmitted()) {
+        console.log("odblokowuje");
+        submitQuizButtonEl.removeAttribute("disabled");
     }
 });
-var button_prev_el = document.getElementById("prev_button");
-button_prev_el.addEventListener('click', function (ev) {
+// SUBMIT
+submitQuizButtonEl.addEventListener('click', function (ev) {
     ev.preventDefault();
-    if (card_number > 0) {
-        card_number--;
-    }
-    var question_el = document.getElementById("question");
-    if (card_number == 0) {
-        // hide question number
-        introduction_el.style.visibility = "visible";
-        question_el.style.visibility = "hidden";
-        players_anwser_el.style.visibility = "hidden";
+    stopTimer();
+    alert("konczymy");
+    // todo tu skonczylem
+});
+// CANCEL BUTTON
+function cancelQuiz() {
+    alert("Cancelling session. Redirecting to the home page. Click \"OK\"");
+    window.location.replace('start.html');
+}
+function resetInput() {
+    document.getElementById("playersAnswer").value = "";
+}
+function setQuestionNumber() {
+    if (cardNumber !== 0) {
+        numberEl.innerHTML = cardNumber.toString() + ". question";
     }
     else {
-        question_el.style.visibility = "visible";
-        question_el.innerHTML = curr_quiz.questions[card_number][0] + " = ";
-        // reset input text value
-        document.querySelector(".quiz_card > form:nth-child(1)").reset();
-        players_anwser_el.style.backgroundColor = "white";
+        numberEl.innerHTML = "";
     }
-});
-var button_next_el = document.getElementById("next_button");
-button_next_el.addEventListener('click', function (ev) {
-    ev.preventDefault();
-    if (card_number < curr_quiz.size) {
-        card_number++;
+}
+function setQuizCardVisibility(state) {
+    questionEl.style.visibility = state;
+    inputEl.style.visibility = state;
+    numberEl.style.visibility = state;
+    submitAnswerEl.style.visibility = state;
+}
+function allAnswersSubmitted() {
+    for (var i = 1; i <= currQuiz.size; i++) {
+        if (userAnswers[i] === undefined) {
+            return false;
+        }
     }
-    if (card_number == 1) {
-        // start the clock
-        // display question number
-        introduction_el.style.visibility = "hidden";
-        players_anwser_el.style.visibility = "visible";
-        question_el.style.visibility = "visible";
-    }
-    question_el.innerHTML = curr_quiz.questions[card_number][0] + " = ";
-    // reset input text value
-    document.querySelector(".quiz_card > form:nth-child(1)").reset();
-    players_anwser_el.style.backgroundColor = "white";
-});
+    return true;
+}
