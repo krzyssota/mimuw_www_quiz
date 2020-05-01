@@ -1,13 +1,12 @@
-
 interface IQuestions {
-    [index: number]: [string, string, number]; // index : questions, anwser, fine (in seconds)
-};
+    [index: number]: [string, string, number] // index : questions, Answer, fine (in seconds)
+}
 interface IQuiz {
-    introduction: string;
-    questions: IQuestions;
-    size: number;
-};
-let jsonQuiz_1: string = `{
+    introduction: string
+    questions: IQuestions
+    size: number
+}
+let jsonQuiz1: string = `{
     "introduction": "Welcome to my quiz",
     "questions":{
         "1": ["10+2", "12", 4],
@@ -16,69 +15,135 @@ let jsonQuiz_1: string = `{
         "4": ["3:1", "3", 10]
     },
     "size": "4"
-}`;
+}`
 
-let curr_quiz: IQuiz = JSON.parse(jsonQuiz_1);
+let introductionEl = document.getElementById("introduction") as HTMLParagraphElement
+let questionEl = document.getElementById("question") as HTMLParagraphElement
 
-let introduction_el = (<HTMLInputElement>document.getElementById("introduction"));
-let your_anwser_label = (<HTMLInputElement>document.getElementById("your_anwser_label"));
-let question_el = (<HTMLInputElement>document.getElementById("question"));
+let timerEl = document.getElementById("timer") as HTMLParagraphElement
+let numberEl = document.getElementById("number") as HTMLParagraphElement
 
-introduction_el.innerHTML = "Introduction: " + "<br>" + curr_quiz.introduction;
+let submitAnswerEl = document.getElementById("submitAnswerButton") as HTMLButtonElement;
+let submitQuizButtonEl = document.getElementById("submitQuizButton") as HTMLButtonElement
+let prevButtonEl = document.getElementById("prevButton") as HTMLButtonElement
+let nextButtonEl = document.getElementById("nextButton") as HTMLButtonElement
 
-let card_number = 0;
+let inputEl = document.getElementById("playersAnswer") as HTMLInputElement;
 
-let players_anwser_el = (<HTMLInputElement>document.getElementById("players_anwser"))
-players_anwser_el.addEventListener('input', (ev: InputEvent) => { // TODO zmienić to na przycisk submit anwser ktory koloruje pole
-    if(players_anwser_el.value === curr_quiz.questions[card_number][1]) {
-        players_anwser_el.style.backgroundColor = "rgb(55, 196, 55)"
+// INIT
+let currQuiz: IQuiz = JSON.parse(jsonQuiz1)
+let cardNumber = 0
+introductionEl.innerHTML = currQuiz.introduction
+let userAnswers = {};
+
+
+// TIMER
+let nIntervId;
+let timeSpent: number = 0;
+
+function startTimer() {
+  nIntervId = setInterval(() => {
+    timeSpent++;
+    timerEl.innerHTML = timeSpent + "s";
+    }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(nIntervId);
+}
+
+
+// BUTTON NEXT
+nextButtonEl.addEventListener('click', (ev: MouseEvent) => {
+    ev.preventDefault()
+
+    if(cardNumber < currQuiz.size) {
+        cardNumber++
+    }
+    if(cardNumber === 1) { // first question card
+
+        // hide introduction and display gameplay elements
+        introductionEl.style.opacity = "0.1";
+        timerEl.style.visibility = "visible";
+        setQuizCardVisibility("visible")
+        startTimer();
+    }
+    // display current question
+    questionEl.innerHTML = currQuiz.questions[cardNumber][0] + " = ";
+    resetInput()
+    // update question number
+    setQuestionNumber();
+})
+
+// PREV BUTTON
+prevButtonEl.addEventListener('click', (ev: MouseEvent) => {
+    ev.preventDefault()
+
+    if(cardNumber > 0) {
+        cardNumber--
+    }
+    if(cardNumber === 0) {
+        stopTimer();
+        // show introduction and hide gameplay elements
+        introductionEl.style.opacity = "1.0"
+
+        setQuizCardVisibility("hidden")
     } else {
-        players_anwser_el.style.backgroundColor = "red";
+        // display current question
+        questionEl.innerHTML = currQuiz.questions[cardNumber][0] + " = ";
+        resetInput()
+    }
+    setQuestionNumber();
+})
+
+// INPUT
+submitAnswerEl.addEventListener('click', (ev: MouseEvent) => {
+    if(inputEl.value !== "") {
+        userAnswers[cardNumber] = inputEl.value;
+    }
+    if(allAnswersSubmitted()) {
+        submitQuizButtonEl.removeAttribute("disabled")
     }
 })
 
-let button_prev_el = (<HTMLInputElement>document.getElementById("prev_button"))
-button_prev_el.addEventListener('click', (ev: MouseEvent) => {
-    ev.preventDefault();
+// SUBMIT
+submitQuizButtonEl.addEventListener('click', (ev: MouseEvent) => {
+    ev.preventDefault()
+    stopTimer();
+    alert("konczymy")
+    // todo tu skonczylem
+})
 
-    if(card_number > 0) {
-        card_number--;
-    }
-    let question_el = (<HTMLInputElement>document.getElementById("question"));
-    if(card_number == 0) {
-        // hide question number
-        introduction_el.style.visibility = "visible";
+// CANCEL BUTTON
+function cancelQuiz() {
+    alert("Cancelling session. Redirecting to the home page. Click \"OK\"");
+    window.location.replace('start.html');
+}
 
-        question_el.style.visibility = "hidden";
-        players_anwser_el.style.visibility = "hidden";
+
+function resetInput() {
+    (document.getElementById("playersAnswer") as HTMLInputElement).value = "";
+}
+function setQuestionNumber() {
+    if(cardNumber !== 0) {
+        numberEl.innerHTML = cardNumber.toString() + ". question";
     } else {
-        question_el.style.visibility = "visible";
-        question_el.innerHTML = curr_quiz.questions[card_number][0] + " = ";
-
-        // reset input text value
-        (<HTMLFormElement>document.querySelector(".quiz_card > form:nth-child(1)")).reset();
-        players_anwser_el.style.backgroundColor = "white";
+        numberEl.innerHTML = "";
     }
-})
+}
 
-let button_next_el = (<HTMLInputElement>document.getElementById("next_button"))
-button_next_el.addEventListener('click', (ev: MouseEvent) => {
-    ev.preventDefault();
+function setQuizCardVisibility(state: string) {
+    questionEl.style.visibility = state
+    inputEl.style.visibility = state
+    numberEl.style.visibility = state
+    submitAnswerEl.style.visibility = state
+}
 
-    if(card_number < curr_quiz.size) {
-        card_number++;
+function allAnswersSubmitted() {
+    for(let i = 1; i <= currQuiz.size; i++) {
+        if(userAnswers[i] === undefined) {
+            return false;
+        }
     }
-    if(card_number == 1) {
-        // start the clock
-        // display question number
-    
-        introduction_el.style.visibility = "hidden";
-        players_anwser_el.style.visibility = "visible";
-        question_el.style.visibility = "visible";
-    }
-    question_el.innerHTML = curr_quiz.questions[card_number][0] + " = ";
-    // reset input text value
-    (<HTMLFormElement>document.querySelector(".quiz_card > form:nth-child(1)")).reset();
-    players_anwser_el.style.backgroundColor = "white";
-
-})
+    return true;
+}

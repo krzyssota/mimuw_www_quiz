@@ -6,20 +6,37 @@
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Page Title</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
-    
+    <link rel='stylesheet' type='text/css' media='screen' href="main.css">
 </head>
 
 <body>
-    <section class="quiz_card">
-        <form action="">
-            <button type=submit id="prev_button">Previous</button>
-            <section id="card_content">
-                <div><p id="question" style="display: inline;"></p><input type="text" name="players_anwser" id="players_anwser" style="display: inline;"></div>
-                <p id="introduction"></p>
-            </section>
-            <button type=submit id="next_button">Next</button>
-        </form>
+    <section class="quizCard">
+
+        <div id="timer" class="infoBox" style="visibility: hidden"></div>
+        <div id="number" class="infoBox" style="visibility: hidden"></div>
+
+        <button id="prevButton">Previous</button>
+        <button id="nextButton">Next</button>
+
+
+        <button id="cancelButton" onclick="cancelQuiz();">Cancel</button>
+        <button id="submitQuizButton" disabled="true">Submit quiz</button>
+
+
+        <section id="cardContent">
+            <p id="introduction"></p>
+            <div>
+                <p id="question" style="display: inline"></p>
+                <input type="text" name="playersAnswer" id="playersAnswer" style="display: inline; visibility: hidden;">
+                <button id="submitAnswerButton" style="display: inline; visibility: hidden;">Submit answer</button>
+            </div>
+
+        </section>
+
+
+
+
+
     </section>
 
     <script src='main.js'></script>
