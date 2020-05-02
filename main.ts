@@ -7,7 +7,7 @@ interface IQuiz {
     size: number
 }
 let jsonQuiz1: string = `{
-    "introduction": "Welcome to my quiz",
+    "introduction": "Welcome to the first quiz",
     "questions":{
         "1": ["10+2", "12", 4],
         "2": ["2-(-24:4)", "8", 10],

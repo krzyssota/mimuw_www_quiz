@@ -1,4 +1,4 @@
-var jsonQuiz1 = "{\n    \"introduction\": \"Welcome to my quiz\",\n    \"questions\":{\n        \"1\": [\"10+2\", \"12\", 4],\n        \"2\": [\"2-(-24:4)\", \"8\", 10],\n        \"3\": [\"2*5\", \"10\", 10],\n        \"4\": [\"3:1\", \"3\", 10]\n    },\n    \"size\": \"4\"\n}";
+var jsonQuiz1 = "{\n    \"introduction\": \"Welcome to the first quiz\",\n    \"questions\":{\n        \"1\": [\"10+2\", \"12\", 4],\n        \"2\": [\"2-(-24:4)\", \"8\", 10],\n        \"3\": [\"2*5\", \"10\", 10],\n        \"4\": [\"3:1\", \"3\", 10]\n    },\n    \"size\": \"4\"\n}";
 var introductionEl = document.getElementById("introduction");
 var questionEl = document.getElementById("question");
 var timerEl = document.getElementById("timer");
@@ -65,13 +65,10 @@ prevButtonEl.addEventListener('click', function (ev) {
 });
 // INPUT
 submitAnswerEl.addEventListener('click', function (ev) {
-    console.log("jestem w listenerze submit answer");
     if (inputEl.value !== "") {
         userAnswers[cardNumber] = inputEl.value;
-        console.log("input niepusty");
     }
     if (allAnswersSubmitted()) {
-        console.log("odblokowuje");
         submitQuizButtonEl.removeAttribute("disabled");
     }
 });

@@ -1,10 +1,33 @@
 /* LAYOUT */
+body {
+    text-align: center;
+    background-color: rgb(9, 71, 100);
+    position: relative;
+}
+.wrapper {
+    /*display: inline-block;*/
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, +35%);
+    
+}
 .quizCard {
     display: grid;
-    grid-template-columns: 1fr 1.5fr 1fr;
-    grid-template-rows: auto;
-    grid-template-areas: "timer question number" "previous question next" "cancel question submit";
+    grid-template-columns: 100px 400px 100px;
+    grid-template-rows: 100px auto;
+    grid-template-areas: "banner banner banner" "timer question number" "previous question next" "cancel question submit";
     gap: 10px 10px;
+    background-color: #427c86;
+}
+#banner {
+    grid-area: banner;
+   
+    color: yellow;
+    margin: auto;
+}
+#banner article {
+    font-size: 5px;
 }
 
 #timer {
@@ -51,4 +74,5 @@ button {
     padding-top: calc(0.5em - 1px);
     text-align: center;
     white-space: nowrap;
+    margin: 5px 10px 5px 10px;
 }
