@@ -10,7 +10,7 @@
 </head>
 
 <body>
-    <div class="wrapper">
+    <div class="cardWrapper">
         <section class="quizCard">
 
                 <div id="banner">
@@ -41,9 +41,30 @@
                     </div>
 
                 </section>
-        
         </section>
     </div>
+        <section id="scoreWrapper" style="visibility: hidden">
+            <table>
+                <caption>Your summary</caption>
+                <thead>
+                  <tr>
+                    <th>question</th>
+                    <th>anwser</th>
+                    <th>time spent</th>
+                    <th>time fine</th>
+                  </tr>
+                </thead>
+                <tfoot>
+                  <tr style="background-color: yellow">
+                    <td colspan="3">OVERALL</td>
+                    <td id="overallScore"></td>
+                  </tr>
+                </tfoot>
+                <tbody id="scoreTableBody">
+                </tbody>
+            </table>
+        </section>
+    
 
     <script src='main.js'></script>
 </body>
