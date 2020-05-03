@@ -1,3 +1,17 @@
+import { addToDatabase, diplayDataByIndex } from './dbModule.js';
+import {
+    introductionEl, questionEl, timerEl, submitAnswerButtonEl, submitQuizButtonEl,
+    prevButtonEl, nextButtonEl, saveScoreButtonEl, saveScoreAndStatisticsButtonEl, inputEl,
+    startquizButtonEl, scoreWrapperEl, startWrapperEl, cardWrapperEl, cancelQuizButtonEl,
+    bestScoresTableBodyEl, scoreTableBodyEl, numberEl, overallScoreEl
+} from "./htmlElements.js"
+
+// TODO
+/* 1) modules
+   2) zielone ramki jak odpowiedz na pytanie juz udzielona
+   3) typy i obiekty jak Mapa
+   4) funkcje : void
+*/
 interface IQuestions {
     [index: number]: [string, string, number] // index : questions, Answer, fine (in seconds)
 }
@@ -6,7 +20,7 @@ interface IQuiz {
     questions: IQuestions
     size: number
 }
-let jsonQuiz1: string = `{
+const jsonQuiz1: string = `{
     "introduction": "Welcome to the first quiz. Baba jajko Baba jajko Baba jajko Baba jajko Baba jajko Baba jajko ",
     "questions":{
         "1": ["10+2", "12", 4],
@@ -16,41 +30,25 @@ let jsonQuiz1: string = `{
     },
     "size": "4"
 }`
+// GLOBAL VARIABLES AND INIT
+const currQuiz: IQuiz = JSON.parse(jsonQuiz1)
+let cardNumber: number;
+let userAnswers: string[];
+let userTimes: number[];
+let enterTime: number;
+let leftTime: number;
+let nIntervId: any;
+let currTime: number;
+let timeSpent: number;
 
-let introductionEl = document.getElementById("introduction") as HTMLParagraphElement
-let questionEl = document.getElementById("question") as HTMLParagraphElement
-
-let timerEl = document.getElementById("timer") as HTMLParagraphElement
-let numberEl = document.getElementById("number") as HTMLParagraphElement
-
-let submitAnswerEl = document.getElementById("submitAnswerButton") as HTMLButtonElement;
-let submitQuizButtonEl = document.getElementById("submitQuizButton") as HTMLButtonElement
-let prevButtonEl = document.getElementById("prevButton") as HTMLButtonElement
-let nextButtonEl = document.getElementById("nextButton") as HTMLButtonElement
-
-let inputEl = document.getElementById("playersAnswer") as HTMLInputElement;
-
-// INIT
-let currQuiz: IQuiz = JSON.parse(jsonQuiz1)
-let cardNumber = 0
-introductionEl.innerHTML = currQuiz.introduction
-let userAnswers = {}
-let userTimes = {};
-for (let i = 1; i <= currQuiz.size; i++) {
-    userTimes[i] = 0;
-}
-let enterTime: number = 0;
-let leftTime: number = 0;
-
+resetVariables();
+diplayDataByIndex(bestScoresTableBodyEl);
 
 // TIMER
-let nIntervId;
-let timeSpent: number = 0;
-
 function startTimer() {
     nIntervId = setInterval(() => {
-        timeSpent++;
-        timerEl.innerHTML = timeSpent + "s";
+        currTime++;
+        timerEl.innerHTML = currTime + "s";
     }, 1000);
 }
 
@@ -58,10 +56,15 @@ function stopTimer() {
     clearInterval(nIntervId);
 }
 
+// START QUIZ
+startquizButtonEl.addEventListener('click', (ev: MouseEvent) => {
+    introductionEl.innerHTML = currQuiz.introduction
+    startWrapperEl.style.visibility = "hidden";
+    cardWrapperEl.style.visibility = "visible";
+})
 
-// BUTTON NEXT
+// NEXT QUESTION
 nextButtonEl.addEventListener('click', (ev: MouseEvent) => {
-    console.log("halo")
     ev.preventDefault()
     saveTimeStatistics();
 
@@ -69,11 +72,10 @@ nextButtonEl.addEventListener('click', (ev: MouseEvent) => {
         cardNumber++
     }
     if (cardNumber === 1) { // first question card
-
         // hide introduction and display gameplay elements
         introductionEl.style.opacity = "0.1";
         timerEl.style.visibility = "visible";
-        setQuizCardVisibility("visible")
+        setQuizCardElementsVisibility("visible")
         startTimer();
     }
     // display current question
@@ -81,9 +83,11 @@ nextButtonEl.addEventListener('click', (ev: MouseEvent) => {
     resetInput()
     // update question number
     setQuestionNumber();
+    // mark if question was already answered
+    markBorderIfAnswerGiven();
 })
 
-// PREV BUTTON
+// PREVIOUS QUESTION
 prevButtonEl.addEventListener('click', (ev: MouseEvent) => {
     ev.preventDefault()
     saveTimeStatistics();
@@ -96,44 +100,78 @@ prevButtonEl.addEventListener('click', (ev: MouseEvent) => {
         // show introduction and hide gameplay elements
         introductionEl.style.opacity = "1.0"
 
-        setQuizCardVisibility("hidden")
+        setQuizCardElementsVisibility("hidden")
     } else {
         // display current question
         questionEl.innerHTML = currQuiz.questions[cardNumber][0] + " = ";
         resetInput()
+        // mark if the answer was already given
+        markBorderIfAnswerGiven();
     }
+    // update question number
     setQuestionNumber();
 })
 
 // SUBMIT ANSWER
-submitAnswerEl.addEventListener('click', (ev: MouseEvent) => {
+submitAnswerButtonEl.addEventListener('click', (ev: MouseEvent) => {
     if (inputEl.value !== "") {
         userAnswers[cardNumber] = inputEl.value;
     }
     if (allAnswersSubmitted()) {
         submitQuizButtonEl.removeAttribute("disabled")
     }
+    markBorderIfAnswerGiven();
+})
+
+// CANCEL QUIZ SESSION
+cancelQuizButtonEl.addEventListener('click', (ev: MouseEvent) => {
+    alert("Cancelling session. Redirecting to the home page. Click \"OK\"");
+    cardWrapperEl.style.visibility = "hidden";
+    setQuizCardElementsVisibility("hidden");
+    timerEl.style.visibility = "hidden";
+    startWrapperEl.style.visibility = "visible";
+    resetVariables();
 })
 
 // SUBMIT QUIZ
 submitQuizButtonEl.addEventListener('click', (ev: MouseEvent) => {
     ev.preventDefault()
     stopTimer();
-    const scoreWrapperEl = document.getElementById("scoreWrapper") as HTMLElement;
-    scoreWrapperEl.setAttribute("style", "visibility: visible");
+    scoreWrapperEl.style.visibility = "visible";
+    cardWrapperEl.style.visibility = "hidden";
+    timerEl.style.visibility = "hidden";
+    setQuizCardElementsVisibility("hidden");
+
     fillScoreTable();
 })
 
-// CANCEL BUTTON
-function cancelQuiz() {
-    alert("Cancelling session. Redirecting to the home page. Click \"OK\"");
-    window.location.replace('start.html');
-}
+// SAVE SCORE
+saveScoreButtonEl.addEventListener('click', (ev: MouseEvent) => {
+    const score: number = timeSpent;
+    const statistics: number[] = [];
+    addToDatabase(score, statistics);
 
+    scoreWrapperEl.style.visibility = "hidden";
+    startWrapperEl.style.visibility = "visible";
+    diplayDataByIndex(bestScoresTableBodyEl);
+    resetVariables();
+})
+
+// SAVE SCORE AND STATISTICS
+saveScoreAndStatisticsButtonEl.addEventListener('click', (ev: MouseEvent) => {
+    const score: number = timeSpent;
+    const statistics: number[] = userTimes;
+    addToDatabase(score, statistics);
+    scoreWrapperEl.style.visibility = "hidden";
+    startWrapperEl.style.visibility = "visible";
+    diplayDataByIndex(bestScoresTableBodyEl);
+    resetVariables();
+})
 
 function resetInput() {
     (document.getElementById("playersAnswer") as HTMLInputElement).value = "";
 }
+
 function setQuestionNumber() {
     if (cardNumber !== 0) {
         numberEl.innerHTML = cardNumber.toString() + ". question";
@@ -142,23 +180,11 @@ function setQuestionNumber() {
     }
 }
 
-// INDEX DB
-/* if (!window.indexedDB) {
-    console.log("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.");
-}
-var db = window.indexedDB.open("QuizDatabase");
-  db.onerror = (event) => {
-    // Generic error handler for all errors targeted at this database's
-    // requests!
-    console.error("Database error: " + event.target.errorCode);
-  }; */
-
-
-function setQuizCardVisibility(state: string) {
+function setQuizCardElementsVisibility(state: string) {
     questionEl.style.visibility = state
     inputEl.style.visibility = state
     numberEl.style.visibility = state
-    submitAnswerEl.style.visibility = state
+    submitAnswerButtonEl.style.visibility = state
 }
 
 function allAnswersSubmitted() {
@@ -172,30 +198,46 @@ function allAnswersSubmitted() {
 
 function saveTimeStatistics() {
     if (cardNumber !== 0) {
-        leftTime = timeSpent;
+        leftTime = currTime;
         userTimes[cardNumber] += (leftTime - enterTime);
-        enterTime = timeSpent;
+        enterTime = currTime;
     }
 }
 
-function fillScoreTable() {
+function fillScoreTable(): void {
     let rows: string = "";
-    let timeSummary: number = 0;
 
     for (let i = 1; i <= currQuiz.size; i++) {
-        const correctAns = (userAnswers[i] === currQuiz.questions[i][1]);
-        const fine = (correctAns ? 0 : currQuiz.questions[i][2])
+        const correctAns: boolean = (userAnswers[i] === currQuiz.questions[i][1]);
+        const fine: number = (correctAns ? 0 : currQuiz.questions[i][2])
 
-        const row = "<tr style=\"background-color:" + (correctAns ? " green" : "red")  + "\">"
-        + "<td>" + currQuiz.questions[i][0] + "</td>"
-        + "<td>" + userAnswers[i] + "</td>"
-        + "<td>" + userTimes[i] + "</td>"
-        + "<td>" + fine + "s" + "</td>"
-        + "</tr>"
+        const row = "<tr style=\"background-color:" + (correctAns ? " green" : "red") + "\">"
+            + "<td>" + currQuiz.questions[i][0] + "</td>"
+            + "<td>" + userAnswers[i] + "</td>"
+            + "<td>" + userTimes[i] + "</td>"
+            + "<td>" + fine + "s" + "</td>"
+            + "</tr>"
 
         rows = rows + row;
-        timeSummary += userTimes[i] + fine;
+        timeSpent += userTimes[i] + fine;
     }
-    (document.getElementById("scoreTableBody") as HTMLElement).innerHTML = rows;
-    (document.getElementById("overallScore") as HTMLElement).innerHTML = timeSummary.toString();
+    scoreTableBodyEl.innerHTML = rows;
+    overallScoreEl.innerHTML = timeSpent.toString() + "s";
+}
+
+function resetVariables() {
+    cardNumber = 0
+    userAnswers = [];
+    userTimes = [];
+    enterTime = 0;
+    leftTime = 0;
+    currTime = 0;
+    timeSpent = 0;
+}
+function markBorderIfAnswerGiven() {
+    if (userAnswers[cardNumber] !== undefined) {
+        numberEl.style.border = "2px yellow solid";
+    } else {
+        numberEl.style.border = "2px grey solid";
+    }
 }

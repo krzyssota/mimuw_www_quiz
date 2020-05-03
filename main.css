@@ -1,32 +1,47 @@
 /* LAYOUT */
+
 body {
     text-align: center;
     background-color: rgb(9, 71, 100);
     position: relative;
 }
-.cardWrapper {
-    /*display: inline-block;*/
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, +50%);
-    
-}
-#scoreWrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(50%, 40%);
+
+#startWrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, +100%);
 }
 
-.quizCard {
+#cardWrapper {
+    /*display: inline-block;*/
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, +50%);
+}
+
+#scoreWrapper {
+    background-color: rgb(9, 71, 100);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, 80%);
+}
+
+#quizCard {
     display: grid;
     grid-template-columns: 100px 400px 100px;
     grid-template-rows: auto;
-    grid-template-areas: "banner banner banner" "timer question number" "previous question next" "cancel question submit" "score score score";
+    grid-template-areas: "banner banner banner"
+    "timer question number"
+    "previous question next"
+    "cancel question submit"
+    "score score score";
     gap: 10px 10px;
     background-color: #427c86;
 }
+
 #banner {
     grid-area: banner;
     margin: auto;
@@ -35,38 +50,62 @@ body {
 #timer {
     grid-area: timer;
 }
+
 #number {
     grid-area: number
 }
+
 #prevButton {
     grid-area: previous;
 }
+
 #nextButton {
     grid-area: next;
 }
+
 #cardContent {
     grid-area: question;
     place-self: center stretch;
 }
+
 #cancelButton {
     grid-area: cancel;
 }
+
 #submitButton {
     grid-area: submit;
 }
+
 #quizScore {
     grid-area: score;
 }
+
+
+@media screen and (max-width: 500px) {
+    #quizCard {
+        display: grid;
+        grid-template-columns: auto;
+        grid-template-rows: auto;
+        grid-template-areas: 
+        "banner banner"
+        "question question"
+        "timer number"
+        "previous next"
+        "cancel submit"
+        "score score";
+    }
+}
+
 /* STYLING */
+
 .infoBox {
     font-size: 10px;
-    /*justify-self: center;
-    border-radius: 25px;*/
-    border: 2px red solid;
+    border: 2px grey solid;
     margin: 5px 10px 5px 10px;
-    padding: 5px; 
+    padding: 5px;
     background-color: white;
 }
+
 button {
     background-color: white;
     border-color: #dbdbdb;
@@ -86,14 +125,19 @@ button {
 #banner {
     color: yellow;
 }
+
 #banner article {
     font-size: 5px;
 }
 
 table {
-    width: 50%;
-    height: 50%;
+    width: 100%;
+    height: 100%;
     font-size: 10px;
     border-collapse: collapse;
     background-color: beige;
+}
+
+caption {
+    color: yellow;
 }

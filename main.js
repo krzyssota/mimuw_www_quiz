@@ -1,39 +1,45 @@
-var jsonQuiz1 = "{\n    \"introduction\": \"Welcome to the first quiz. Baba jajko Baba jajko Baba jajko Baba jajko Baba jajko Baba jajko \",\n    \"questions\":{\n        \"1\": [\"10+2\", \"12\", 4],\n        \"2\": [\"2-(-24:4)\", \"8\", 10],\n        \"3\": [\"2*5\", \"10\", 10],\n        \"4\": [\"3:1\", \"3\", 10]\n    },\n    \"size\": \"4\"\n}";
-var introductionEl = document.getElementById("introduction");
-var questionEl = document.getElementById("question");
-var timerEl = document.getElementById("timer");
-var numberEl = document.getElementById("number");
-var submitAnswerEl = document.getElementById("submitAnswerButton");
-var submitQuizButtonEl = document.getElementById("submitQuizButton");
-var prevButtonEl = document.getElementById("prevButton");
-var nextButtonEl = document.getElementById("nextButton");
-var inputEl = document.getElementById("playersAnswer");
-// INIT
-var currQuiz = JSON.parse(jsonQuiz1);
-var cardNumber = 0;
-introductionEl.innerHTML = currQuiz.introduction;
-var userAnswers = {};
-var userTimes = {};
-for (var i = 1; i <= currQuiz.size; i++) {
-    userTimes[i] = 0;
-}
-var enterTime = 0;
-var leftTime = 0;
+import { addToDatabase, diplayDataByIndex } from './dbModule.js';
+import { introductionEl, questionEl, timerEl, submitAnswerButtonEl, submitQuizButtonEl, prevButtonEl, nextButtonEl, saveScoreButtonEl, saveScoreAndStatisticsButtonEl, inputEl, startquizButtonEl, scoreWrapperEl, startWrapperEl, cardWrapperEl, cancelQuizButtonEl, bestScoresTableBodyEl, scoreTableBodyEl, numberEl, overallScoreEl } from "./htmlElements.js";
+const jsonQuiz1 = `{
+    "introduction": "Welcome to the first quiz. Baba jajko Baba jajko Baba jajko Baba jajko Baba jajko Baba jajko ",
+    "questions":{
+        "1": ["10+2", "12", 4],
+        "2": ["2-(-24:4)", "8", 10],
+        "3": ["2*5", "10", 10],
+        "4": ["3:1", "3", 10]
+    },
+    "size": "4"
+}`;
+// GLOBAL VARIABLES AND INIT
+const currQuiz = JSON.parse(jsonQuiz1);
+let cardNumber;
+let userAnswers;
+let userTimes;
+let enterTime;
+let leftTime;
+let nIntervId;
+let currTime;
+let timeSpent;
+resetVariables();
+diplayDataByIndex(bestScoresTableBodyEl);
 // TIMER
-var nIntervId;
-var timeSpent = 0;
 function startTimer() {
-    nIntervId = setInterval(function () {
-        timeSpent++;
-        timerEl.innerHTML = timeSpent + "s";
+    nIntervId = setInterval(() => {
+        currTime++;
+        timerEl.innerHTML = currTime + "s";
     }, 1000);
 }
 function stopTimer() {
     clearInterval(nIntervId);
 }
-// BUTTON NEXT
-nextButtonEl.addEventListener('click', function (ev) {
-    console.log("halo");
+// START QUIZ
+startquizButtonEl.addEventListener('click', (ev) => {
+    introductionEl.innerHTML = currQuiz.introduction;
+    startWrapperEl.style.visibility = "hidden";
+    cardWrapperEl.style.visibility = "visible";
+});
+// NEXT QUESTION
+nextButtonEl.addEventListener('click', (ev) => {
     ev.preventDefault();
     saveTimeStatistics();
     if (cardNumber < currQuiz.size) {
@@ -43,7 +49,7 @@ nextButtonEl.addEventListener('click', function (ev) {
         // hide introduction and display gameplay elements
         introductionEl.style.opacity = "0.1";
         timerEl.style.visibility = "visible";
-        setQuizCardVisibility("visible");
+        setQuizCardElementsVisibility("visible");
         startTimer();
     }
     // display current question
@@ -51,9 +57,11 @@ nextButtonEl.addEventListener('click', function (ev) {
     resetInput();
     // update question number
     setQuestionNumber();
+    // mark if question was already answered
+    markBorderIfAnswerGiven();
 });
-// PREV BUTTON
-prevButtonEl.addEventListener('click', function (ev) {
+// PREVIOUS QUESTION
+prevButtonEl.addEventListener('click', (ev) => {
     ev.preventDefault();
     saveTimeStatistics();
     if (cardNumber > 0) {
@@ -63,37 +71,67 @@ prevButtonEl.addEventListener('click', function (ev) {
         stopTimer();
         // show introduction and hide gameplay elements
         introductionEl.style.opacity = "1.0";
-        setQuizCardVisibility("hidden");
+        setQuizCardElementsVisibility("hidden");
     }
     else {
         // display current question
         questionEl.innerHTML = currQuiz.questions[cardNumber][0] + " = ";
         resetInput();
+        // mark if the answer was already given
+        markBorderIfAnswerGiven();
     }
+    // update question number
     setQuestionNumber();
 });
 // SUBMIT ANSWER
-submitAnswerEl.addEventListener('click', function (ev) {
+submitAnswerButtonEl.addEventListener('click', (ev) => {
     if (inputEl.value !== "") {
         userAnswers[cardNumber] = inputEl.value;
     }
     if (allAnswersSubmitted()) {
         submitQuizButtonEl.removeAttribute("disabled");
     }
+    markBorderIfAnswerGiven();
+});
+// CANCEL QUIZ SESSION
+cancelQuizButtonEl.addEventListener('click', (ev) => {
+    alert("Cancelling session. Redirecting to the home page. Click \"OK\"");
+    cardWrapperEl.style.visibility = "hidden";
+    setQuizCardElementsVisibility("hidden");
+    timerEl.style.visibility = "hidden";
+    startWrapperEl.style.visibility = "visible";
+    resetVariables();
 });
 // SUBMIT QUIZ
-submitQuizButtonEl.addEventListener('click', function (ev) {
+submitQuizButtonEl.addEventListener('click', (ev) => {
     ev.preventDefault();
     stopTimer();
-    var scoreWrapperEl = document.getElementById("scoreWrapper");
-    scoreWrapperEl.setAttribute("style", "visibility: visible");
+    scoreWrapperEl.style.visibility = "visible";
+    cardWrapperEl.style.visibility = "hidden";
+    timerEl.style.visibility = "hidden";
+    setQuizCardElementsVisibility("hidden");
     fillScoreTable();
 });
-// CANCEL BUTTON
-function cancelQuiz() {
-    alert("Cancelling session. Redirecting to the home page. Click \"OK\"");
-    window.location.replace('start.html');
-}
+// SAVE SCORE
+saveScoreButtonEl.addEventListener('click', (ev) => {
+    const score = timeSpent;
+    const statistics = [];
+    addToDatabase(score, statistics);
+    scoreWrapperEl.style.visibility = "hidden";
+    startWrapperEl.style.visibility = "visible";
+    diplayDataByIndex(bestScoresTableBodyEl);
+    resetVariables();
+});
+// SAVE SCORE AND STATISTICS
+saveScoreAndStatisticsButtonEl.addEventListener('click', (ev) => {
+    const score = timeSpent;
+    const statistics = userTimes;
+    addToDatabase(score, statistics);
+    scoreWrapperEl.style.visibility = "hidden";
+    startWrapperEl.style.visibility = "visible";
+    diplayDataByIndex(bestScoresTableBodyEl);
+    resetVariables();
+});
 function resetInput() {
     document.getElementById("playersAnswer").value = "";
 }
@@ -105,24 +143,14 @@ function setQuestionNumber() {
         numberEl.innerHTML = "";
     }
 }
-// INDEX DB
-/* if (!window.indexedDB) {
-    console.log("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.");
-}
-var db = window.indexedDB.open("QuizDatabase");
-  db.onerror = (event) => {
-    // Generic error handler for all errors targeted at this database's
-    // requests!
-    console.error("Database error: " + event.target.errorCode);
-  }; */
-function setQuizCardVisibility(state) {
+function setQuizCardElementsVisibility(state) {
     questionEl.style.visibility = state;
     inputEl.style.visibility = state;
     numberEl.style.visibility = state;
-    submitAnswerEl.style.visibility = state;
+    submitAnswerButtonEl.style.visibility = state;
 }
 function allAnswersSubmitted() {
-    for (var i = 1; i <= currQuiz.size; i++) {
+    for (let i = 1; i <= currQuiz.size; i++) {
         if (userAnswers[i] === undefined) {
             return false;
         }
@@ -131,26 +159,42 @@ function allAnswersSubmitted() {
 }
 function saveTimeStatistics() {
     if (cardNumber !== 0) {
-        leftTime = timeSpent;
+        leftTime = currTime;
         userTimes[cardNumber] += (leftTime - enterTime);
-        enterTime = timeSpent;
+        enterTime = currTime;
     }
 }
 function fillScoreTable() {
-    var rows = "";
-    var timeSummary = 0;
-    for (var i = 1; i <= currQuiz.size; i++) {
-        var correctAns = (userAnswers[i] === currQuiz.questions[i][1]);
-        var fine = (correctAns ? 0 : currQuiz.questions[i][2]);
-        var row = "<tr style=\"background-color:" + (correctAns ? " green" : "red") + "\">"
+    let rows = "";
+    for (let i = 1; i <= currQuiz.size; i++) {
+        const correctAns = (userAnswers[i] === currQuiz.questions[i][1]);
+        const fine = (correctAns ? 0 : currQuiz.questions[i][2]);
+        const row = "<tr style=\"background-color:" + (correctAns ? " green" : "red") + "\">"
             + "<td>" + currQuiz.questions[i][0] + "</td>"
             + "<td>" + userAnswers[i] + "</td>"
             + "<td>" + userTimes[i] + "</td>"
             + "<td>" + fine + "s" + "</td>"
             + "</tr>";
         rows = rows + row;
-        timeSummary += userTimes[i] + fine;
+        timeSpent += userTimes[i] + fine;
     }
-    document.getElementById("scoreTableBody").innerHTML = rows;
-    document.getElementById("overallScore").innerHTML = timeSummary.toString();
+    scoreTableBodyEl.innerHTML = rows;
+    overallScoreEl.innerHTML = timeSpent.toString() + "s";
+}
+function resetVariables() {
+    cardNumber = 0;
+    userAnswers = [];
+    userTimes = [];
+    enterTime = 0;
+    leftTime = 0;
+    currTime = 0;
+    timeSpent = 0;
+}
+function markBorderIfAnswerGiven() {
+    if (userAnswers[cardNumber] !== undefined) {
+        numberEl.style.border = "2px yellow solid";
+    }
+    else {
+        numberEl.style.border = "2px grey solid";
+    }
 }

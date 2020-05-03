@@ -10,63 +10,81 @@
 </head>
 
 <body>
-    <div class="cardWrapper">
-        <section class="quizCard">
-
-                <div id="banner">
-                    <p>QUISSUP</p>
-                    <article>IDK QUISSUP WITH YOU?</article>
-                </div>
-    
-
-                <div id="timer" class="infoBox" style="visibility: hidden"></div>
-                <div id="number" class="infoBox" style="visibility: hidden"></div>
-
-                <button id="prevButton">Previous</button>
-                <button id="nextButton">Next</button>
-
-
-                <button id="cancelButton" onclick="cancelQuiz();">Cancel</button>
-                <button id="submitQuizButton" disabled="true">Submit quiz</button>
-
-
-                <section id="cardContent">
-                    <p id="introduction"></p>
-                    <div>
-                        <p id="question" style="display: inline"></p>
-                        <input type="text" name="playersAnswer" id="playersAnswer"
-                            style="display: inline; visibility: hidden;">
-                        <button id="submitAnswerButton" style="display: inline; visibility: hidden;">Submit
-                            answer</button>
-                    </div>
-
-                </section>
-        </section>
-    </div>
-        <section id="scoreWrapper" style="visibility: hidden">
+    <div id="startWrapper">
+        <section id="startCard">
             <table>
-                <caption>Your summary</caption>
+                <caption>BEST SCORES</caption>
                 <thead>
-                  <tr>
-                    <th>question</th>
-                    <th>anwser</th>
-                    <th>time spent</th>
-                    <th>time fine</th>
-                  </tr>
+                    <tr>
+                        <th>overall time</th>
+                    </tr>
                 </thead>
-                <tfoot>
-                  <tr style="background-color: yellow">
-                    <td colspan="3">OVERALL</td>
-                    <td id="overallScore"></td>
-                  </tr>
-                </tfoot>
-                <tbody id="scoreTableBody">
+                <tbody id="bestScoresTableBody">
                 </tbody>
             </table>
+            <button id="startQuizButton">Start a quiz</button>
         </section>
-    
+    </div>
+    <div id="cardWrapper" style="visibility: hidden;">
+        <section id="quizCard">
 
-    <script src='main.js'></script>
+            <div id="banner">
+                <p>QUISSUP</p>
+                <article>IDK QUISSUP WITH YOU?</article>
+            </div>
+
+
+            <div id="timer" class="infoBox" style="visibility: hidden"></div>
+            <div id="number" class="infoBox" style="visibility: hidden"></div>
+
+            <button id="prevButton">Previous</button>
+            <button id="nextButton">Next</button>
+
+
+            <button id="cancelQuizButton">Cancel</button>
+            <button id="submitQuizButton" disabled="true">Submit quiz</button>
+
+
+            <section id="cardContent">
+                <p id="introduction"></p>
+                <div>
+                    <p id="question" style="display: inline"></p>
+                    <input type="text" name="playersAnswer" id="playersAnswer"
+                        style="display: inline; visibility: hidden;">
+                    <button id="submitAnswerButton" style="display: inline; visibility: hidden;">Submit
+                        answer</button>
+                </div>
+
+            </section>
+        </section>
+    </div>
+    <div id="scoreWrapper" style="visibility: hidden">
+        <table>
+            <caption>SCORE</caption>
+            <thead>
+                <tr>
+                    <th>question</th>
+                    <th>answer</th>
+                    <th>time spent</th>
+                    <th>time fine</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr style="background-color: yellow">
+                    <td colspan="3">OVERALL</td>
+                    <td id="overallScore"></td>
+                </tr>
+            </tfoot>
+            <tbody id="scoreTableBody">
+            </tbody>
+        </table>
+        <button id="saveScoreButton" style="display: inline">Save score</button>
+        <button id="saveScoreAndStatisticsButton" style="display: inline">Save score and time
+            statistics</button>
+    </div>
+
+
+    <script type="module" src='main.js'></script>
 </body>
 
 </html>
