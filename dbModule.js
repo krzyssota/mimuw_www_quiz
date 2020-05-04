@@ -1,3 +1,7 @@
+// code partially taken from
+// www.youtube.com/watch?v=g4U5WRzHitM&t=976s
+// developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
+// (access 03.05.2020)
 function openDatabase() {
     if (!window.indexedDB) {
         alert("indexedDB not supported");
@@ -30,7 +34,6 @@ export function addToDatabase(quizScore, quizStatistics) {
         };
     };
 }
-// https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/index
 export function diplayDataByIndex(bestScoresTableBodyEl) {
     const request = openDatabase();
     request.onsuccess = function (e) {
@@ -45,7 +48,7 @@ export function diplayDataByIndex(bestScoresTableBodyEl) {
             if (cursor && i < 5) {
                 console.log("i: " + i);
                 i++;
-                let row = "<tr>"
+                const row = "<tr>"
                     + "<td>" + cursor.value.score + "</td>"
                     + "</tr>";
                 console.log("row: " + row);
@@ -53,8 +56,5 @@ export function diplayDataByIndex(bestScoresTableBodyEl) {
                 cursor.continue();
             }
         };
-        if (i === 0) {
-            bestScoresTableBodyEl.innerHTML = " - ";
-        }
     };
 }
