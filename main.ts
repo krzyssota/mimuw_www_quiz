@@ -39,14 +39,14 @@ resetVariables();
 diplayDataByIndex(bestScoresTableBodyEl);
 
 // TIMER
-function startTimer() {
+function startTimer(): void {
     nIntervId = setInterval(() => {
         currTime++;
         timerEl.innerHTML = currTime + "s";
     }, 1000);
 }
 
-function stopTimer() {
+function stopTimer(): void {
     clearInterval(nIntervId);
 }
 
@@ -171,7 +171,7 @@ saveScoreAndStatisticsButtonEl.addEventListener('click', (ev: MouseEvent) => {
 function resetInput() {
     (document.getElementById("playersAnswer") as HTMLInputElement).value = "";
 }
- 
+
 function displayQuestionNumber() {
     if (cardNumber !== 0) {
         numberEl.innerHTML = cardNumber.toString() + ". question";

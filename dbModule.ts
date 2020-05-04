@@ -8,14 +8,14 @@ function openDatabase(): any {
     if (!window.indexedDB) {
         alert("indexedDB not supported");
     }
-    let request = window.indexedDB.open("ScoreDatabase", 1);
+    const request = window.indexedDB.open("ScoreDatabase", 1);
 
     request.onupgradeneeded = function (e) {
         console.log("in upgrade");
-        let db = request.result;
-        let store = db.createObjectStore("ScoreStore",
+        const db = request.result;
+        const store = db.createObjectStore("ScoreStore",
             { autoIncrement: true });
-        let index = store.createIndex("score", "score", { unique: false });
+        const index = store.createIndex("score", "score", { unique: false });
     };
 
     request.onerror = function (e) {
