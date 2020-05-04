@@ -1,4 +1,9 @@
 
+// code partially taken from
+// www.youtube.com/watch?v=g4U5WRzHitM&t=976s
+// developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
+// (access 03.05.2020)
+
 function openDatabase(): any {
     if (!window.indexedDB) {
         alert("indexedDB not supported");
@@ -38,7 +43,7 @@ export function addToDatabase(quizScore: number, quizStatistics: number[]): void
         }
     }
 }
-// https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/index
+
 export function diplayDataByIndex(bestScoresTableBodyEl: HTMLElement): void {
     const request: any = openDatabase();
 

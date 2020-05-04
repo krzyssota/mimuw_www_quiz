@@ -6,26 +6,20 @@ import {
     bestScoresTableBodyEl, scoreTableBodyEl, numberEl, overallScoreEl
 } from "./htmlElements.js"
 
-// TODO
-/* 1) modules
-   2) zielone ramki jak odpowiedz na pytanie juz udzielona
-   3) typy i obiekty jak Mapa
-   4) funkcje : void
-*/
 interface IQuestions {
-    [index: number]: [string, string, number] // index : questions, Answer, fine (in seconds)
+    [index: number]: [string, string, number] // question number -> (questions, answer, fine)
 }
 interface IQuiz {
     introduction: string
     questions: IQuestions
-    size: number
+    size: number // number of questions in the quiz
 }
 const jsonQuiz1: string = `{
-    "introduction": "Welcome to the first quiz. Baba jajko Baba jajko Baba jajko Baba jajko Baba jajko Baba jajko ",
+    "introduction": "Hope you will enjoy this quiz. All answers are integrals. Answered questions will be signalled with yellow border around question number.",
     "questions":{
         "1": ["10+2", "12", 4],
-        "2": ["2-(-24:4)", "8", 10],
-        "3": ["2*5", "10", 10],
+        "2": ["2-(-24:4)", "8", 30],
+        "3": ["2*5", "10", 20],
         "4": ["3:1", "3", 10]
     },
     "size": "4"
@@ -58,6 +52,7 @@ function stopTimer() {
 
 // START QUIZ
 startquizButtonEl.addEventListener('click', (ev: MouseEvent) => {
+    // display introduction card
     introductionEl.innerHTML = currQuiz.introduction
     introductionEl.style.opacity = "1.0";
     startWrapperEl.style.visibility = "hidden";
@@ -72,7 +67,7 @@ nextButtonEl.addEventListener('click', (ev: MouseEvent) => {
     if (cardNumber < currQuiz.size) {
         cardNumber++
     }
-    if (cardNumber === 1) { // first question card
+    if (cardNumber === 1) {
         // hide introduction and display gameplay elements
         introductionEl.style.opacity = "0.1";
         timerEl.style.visibility = "visible";
@@ -83,7 +78,7 @@ nextButtonEl.addEventListener('click', (ev: MouseEvent) => {
     questionEl.innerHTML = currQuiz.questions[cardNumber][0] + " = ";
     resetInput()
     // update question number
-    setQuestionNumber();
+    displayQuestionNumber();
     // mark if question was already answered
     markBorderIfAnswerGiven();
 })
@@ -100,7 +95,6 @@ prevButtonEl.addEventListener('click', (ev: MouseEvent) => {
         stopTimer();
         // show introduction and hide gameplay elements
         introductionEl.style.opacity = "1.0"
-
         setQuizCardElementsVisibility("hidden")
     } else {
         // display current question
@@ -110,7 +104,7 @@ prevButtonEl.addEventListener('click', (ev: MouseEvent) => {
         markBorderIfAnswerGiven();
     }
     // update question number
-    setQuestionNumber();
+    displayQuestionNumber();
 })
 
 // SUBMIT ANSWER
@@ -138,6 +132,7 @@ cancelQuizButtonEl.addEventListener('click', (ev: MouseEvent) => {
 submitQuizButtonEl.addEventListener('click', (ev: MouseEvent) => {
     ev.preventDefault()
     stopTimer();
+    // hide gameplay, display summary
     scoreWrapperEl.style.visibility = "visible";
     cardWrapperEl.style.visibility = "hidden";
     timerEl.style.visibility = "hidden";
@@ -148,10 +143,11 @@ submitQuizButtonEl.addEventListener('click', (ev: MouseEvent) => {
 
 // SAVE SCORE
 saveScoreButtonEl.addEventListener('click', (ev: MouseEvent) => {
+    // save to database
     const score: number = timeSpent;
     const statistics: number[] = [];
     addToDatabase(score, statistics);
-
+    // hide summary, display home page
     scoreWrapperEl.style.visibility = "hidden";
     startWrapperEl.style.visibility = "visible";
     diplayDataByIndex(bestScoresTableBodyEl);
@@ -160,20 +156,23 @@ saveScoreButtonEl.addEventListener('click', (ev: MouseEvent) => {
 
 // SAVE SCORE AND STATISTICS
 saveScoreAndStatisticsButtonEl.addEventListener('click', (ev: MouseEvent) => {
+    // save to database
     const score: number = timeSpent;
     const statistics: number[] = userTimes;
     addToDatabase(score, statistics);
+    // hide summary, display home page
     scoreWrapperEl.style.visibility = "hidden";
     startWrapperEl.style.visibility = "visible";
     diplayDataByIndex(bestScoresTableBodyEl);
     resetVariables();
 })
 
+// clear player's answer input field
 function resetInput() {
     (document.getElementById("playersAnswer") as HTMLInputElement).value = "";
 }
-
-function setQuestionNumber() {
+ 
+function displayQuestionNumber() {
     if (cardNumber !== 0) {
         numberEl.innerHTML = cardNumber.toString() + ". question";
     } else {
@@ -206,6 +205,7 @@ function saveTimeStatistics() {
     }
 }
 
+// prepare score table for summary
 function fillScoreTable(): void {
     let rows: string = "";
 
@@ -217,14 +217,14 @@ function fillScoreTable(): void {
             + "<td>" + currQuiz.questions[i][0] + "</td>"
             + "<td>" + userAnswers[i] + "</td>"
             + "<td>" + userTimes[i] + "</td>"
-            + "<td>" + fine + "s" + "</td>"
+            + "<td>" + fine + "</td>"
             + "</tr>"
 
         rows = rows + row;
         timeSpent += +userTimes[i] + +fine;
     }
     scoreTableBodyEl.innerHTML = rows;
-    overallScoreEl.innerHTML = timeSpent.toString() + "s";
+    overallScoreEl.innerHTML = timeSpent.toString();
 }
 
 function resetVariables() {
@@ -239,6 +239,7 @@ function resetVariables() {
     currTime = 0;
     timeSpent = 0;
 }
+
 function markBorderIfAnswerGiven() {
     if (userAnswers[cardNumber] !== undefined) {
         numberEl.style.border = "2px yellow solid";

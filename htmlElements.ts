@@ -1,5 +1,4 @@
 
-
 export const introductionEl = document.getElementById("introduction") as HTMLParagraphElement
 export const questionEl = document.getElementById("question") as HTMLParagraphElement
 
