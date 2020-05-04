@@ -1,0 +1,24 @@
+{
+  "name": "zal1_quiz",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc --target ES2016 main.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krzyssota/mimuw_www_quiz.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/krzyssota/mimuw_www_quiz/issues"
+  },
+  "homepage": "https://github.com/krzyssota/mimuw_www_quiz#readme",
+  "dependencies": {
+    "@types/node": "^13.13.4"
+  }
+}

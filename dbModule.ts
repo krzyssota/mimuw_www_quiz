@@ -53,21 +53,17 @@ export function diplayDataByIndex(bestScoresTableBodyEl: HTMLElement): void {
         bestScoresTableBodyEl.innerHTML = "";
 
         index.openCursor().onsuccess = function (event){
-            let cursor = event.target.result;
+            let cursor: any = event.target.result;
             if (cursor && i < 5) {
                 console.log("i: " + i)
-                console.log("halko " + cursor.value.score);
                 i++;
-                let row = "<tr>"
+                const row: string = "<tr>"
                 + "<td>" + cursor.value.score + "</td>"
                 + "</tr>";
                 console.log("row: " + row);
                 bestScoresTableBodyEl.innerHTML += row;
 
                 cursor.continue();
-            } else {
-                console.log("bestScoresTableBodyEl.innerHTML: " + bestScoresTableBodyEl.innerHTML)
-                console.log('Entries all displayed.');
             }
         };
     };

@@ -59,6 +59,7 @@ function stopTimer() {
 // START QUIZ
 startquizButtonEl.addEventListener('click', (ev: MouseEvent) => {
     introductionEl.innerHTML = currQuiz.introduction
+    introductionEl.style.opacity = "1.0";
     startWrapperEl.style.visibility = "hidden";
     cardWrapperEl.style.visibility = "visible";
 })
@@ -199,7 +200,8 @@ function allAnswersSubmitted() {
 function saveTimeStatistics() {
     if (cardNumber !== 0) {
         leftTime = currTime;
-        userTimes[cardNumber] += (leftTime - enterTime);
+        const timeOnQuestion: number = leftTime - enterTime;
+        userTimes[cardNumber] = userTimes[cardNumber] + +timeOnQuestion;
         enterTime = currTime;
     }
 }
@@ -219,7 +221,7 @@ function fillScoreTable(): void {
             + "</tr>"
 
         rows = rows + row;
-        timeSpent += userTimes[i] + fine;
+        timeSpent += +userTimes[i] + +fine;
     }
     scoreTableBodyEl.innerHTML = rows;
     overallScoreEl.innerHTML = timeSpent.toString() + "s";
@@ -229,6 +231,9 @@ function resetVariables() {
     cardNumber = 0
     userAnswers = [];
     userTimes = [];
+    for(let i: number = 1; i <= currQuiz.size; i++) {
+        userTimes[i] = 0;
+    }
     enterTime = 0;
     leftTime = 0;
     currTime = 0;
